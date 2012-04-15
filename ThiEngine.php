@@ -758,6 +758,7 @@ class ThiEngineParser {
 	var $_block_count;
 	
 	var $_keywords_reg;
+	var $_keywords_dic;
 	var $_last_keyword_next_pos;
 	var $_symbols_reg;
 	
@@ -815,6 +816,7 @@ class ThiEngineParser {
 		$this->_src = $src;
 		$this->_pos = 0;
 		$this->_block_count = 0;
+		$this->_keywords_dic = null;
 		$this->_keywords_reg = null;
 		$this->_last_keyword_next_pos = null;
 		$this->_symbols_reg = null;
@@ -1395,6 +1397,21 @@ class ThiEngineParser {
 			return $i;
 		}
 		
+		if(!isset($this->_keywords_dic))
+		{
+			$this->_keywords_dic = array();
+			
+			foreach($this->KEYWORDS as $key => $words)
+			{
+				$this->_keywords_dic[$key] = array_flip($words);
+			}
+		}
+		
+		if(!isset($this->_keywords_dic) || (count($this->_keywords_dic) == 0))
+		{
+			return $i;
+		}
+		
 		foreach($this->KEYWORDS as $key => $words)
 		{
 			$regexp = "/^{$this->_keywords_reg[$key]}/";
@@ -1407,7 +1424,7 @@ class ThiEngineParser {
 				
 				for($val = $word; $len > 1 ; $len--)
 				{
-					if(in_array($val, $words))
+					if(array_key_exists($val, $this->_keywords_dic))
 					{
 						$find = true;
 						break;
