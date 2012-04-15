@@ -1835,14 +1835,30 @@ class ThiEngineParser {
 		
 		if((empty($esc)) && (!isset($open_reg)))
 		{
-			$close_reg = preg_quote($close, "/");
-			$regexp = "/^([^{$close_reg}]*?){$close_reg}|\\0/s";
+			if(strlen($close) > 1)
+			{
+				$close_reg = null;
+				$regexp = null;
+			}
+			else
+			{
+				$close_reg = preg_quote($close, "/");
+				$regexp = "/^([^{$close_reg}]*?){$close_reg}|\\0/s";
+			}
 		}
 		else if(!isset($open_reg))
 		{
-			$esc_reg = preg_quote($esc, "/");
-			$close_reg = preg_quote($close, "/");
-			$regexp = "/^(((?:{$esc_reg}{2})|(?:{$esc_reg}{$close_reg})|[^{$close_reg}])*){$close_reg}|\\0/s";
+			if((strlen($close) > 1) || (strlen($esc) > 1))
+			{
+				$close_reg = null;
+				$regexp = null;
+			}
+			else
+			{
+				$esc_reg = preg_quote($esc, "/");
+				$close_reg = preg_quote($close, "/");
+				$regexp = "/^(((?:{$esc_reg}{2})|(?:{$esc_reg}{$close_reg})|[^{$close_reg}])*){$close_reg}|\\0/s";
+			}
 		}
 		else
 		{
@@ -1852,8 +1868,29 @@ class ThiEngineParser {
 		$check = substr($this->_src, $i);
 		
 		if(!isset($open_reg))
-		{			
-			if(preg_match($regexp, $check, $match))
+		{
+			if(!isset($regexp))
+			{
+				if(empty($esc))
+				{
+					$end = strpos($this->_src, $close, $i);
+					$value = ($end == $i) ? "" : substr($this->_src, $i, $end - $i);
+				}
+				else
+				{
+					$p = $i;
+					$end = strpos($this->_src, $close, $p);
+					
+					while($end == (strpos($this->_src, $esc, $p) + strlen($esc)))
+					{
+						$p = $end + strlen($close);
+						$end = strpos($this->_src, $close, $p);
+					}
+					
+					$value = ($end == $i) ? "" : substr($this->_src, $i, $end - $i);
+				}
+			}
+			else if(preg_match($regexp, $check, $match))
 			{
 				$value = $match[1];
 			}
