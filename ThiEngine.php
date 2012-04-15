@@ -1424,7 +1424,7 @@ class ThiEngineParser {
 				
 				for($val = $word; $len > 1 ; $len--)
 				{
-					if(array_key_exists($val, $this->_keywords_dic))
+					if(array_key_exists($val, $this->_keywords_dic[$key]))
 					{
 						$find = true;
 						break;
